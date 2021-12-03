@@ -23,14 +23,8 @@ class Main {
       return 0;
     }
 
-    System.out.println("Bitword size: " + diagnosticReport.getBitWordSize());
-
-    // most common bit
     int gRate = findGammaRate(diagnosticReport);
     int eRate = ~gRate & getBitMask(diagnosticReport.bitWordSize);
-
-    System.out.println("Gamma Rate: " + gRate);
-    System.out.println("Epsilon Rate: " + eRate);
 
     int powerConsumption = gRate * eRate;
 
@@ -38,7 +32,34 @@ class Main {
   }
 
   public static int part2(String fileName) {
-    return 0;
+    DiagnosticReport diagnosticReport = parseInput(fileName);
+
+    int oxygenGeneratorRating = getLifeSupportData(diagnosticReport.bitWords, diagnosticReport.bitWordSize, LifeSupportSystems.OXYGEN_GENERATOR);
+    int carbonDioxideScrubberRating = getLifeSupportData(diagnosticReport.bitWords, diagnosticReport.bitWordSize, LifeSupportSystems.CO2_SCRUBBER);
+
+    int lifeSupportRating = oxygenGeneratorRating * carbonDioxideScrubberRating;
+
+    return lifeSupportRating;
+  }
+
+  public static int getLifeSupportData(ArrayList<Integer> bitWords, int index, LifeSupportSystems lifeSupportSystem) {
+    boolean dataTypeFlag = lifeSupportSystem == LifeSupportSystems.OXYGEN_GENERATOR ? true : false;
+
+    if (bitWords.size() == 1) {
+      return bitWords.get(0);
+    }
+
+    ArrayList<Integer> filteredBitWords = new ArrayList<>();
+    int commonBit = findCommonBit(bitWords, index, dataTypeFlag);
+
+    for (int i = 0; i < bitWords.size(); i++) {
+      int bitPosition = isBitSet(bitWords.get(i), index) ? 1 : 0;
+      if (bitPosition == commonBit) {
+        filteredBitWords.add(bitWords.get(i));
+      }
+    }
+
+    return getLifeSupportData(filteredBitWords, index -= 1, lifeSupportSystem);
   }
 
   public static int getBitMask(int bitWordSize) {
@@ -56,7 +77,7 @@ class Main {
     int gRate = 0;
     
     for (int i = diagnosticReport.bitWordSize; i > 0; i--) {
-      if (findMostCommonBit(diagnosticReport.bitWords, i) > 0) {
+      if (findCommonBit(diagnosticReport.bitWords, i, true) > 0) {
         gRate = gRate << 1;
         gRate += 1;
       } else {
@@ -67,7 +88,7 @@ class Main {
     return gRate;
   }
 
-  public static int findMostCommonBit(ArrayList<Integer> bitWords, int index) {
+  public static int findCommonBit(ArrayList<Integer> bitWords, int index, boolean mostCommon) {
     int setBits = 0;
     int emptyBits = 0;
     
@@ -79,9 +100,13 @@ class Main {
       }
     }
 
-    int mostCommonBit = setBits - emptyBits > 0 ? 1 : 0;
+    int mostCommonBit = 0;
 
-    System.out.println("Most common bit for index " + index + " is " + mostCommonBit);
+    if (mostCommon) {
+      mostCommonBit = setBits - emptyBits >= 0 ? 1 : 0;
+    } else {
+      mostCommonBit = setBits - emptyBits >= 0 ? 0 : 1;
+    }
     
     return mostCommonBit;
   }
