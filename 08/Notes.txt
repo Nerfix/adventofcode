@@ -1,0 +1,64 @@
+be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb
+removing 1
+cfgad cbdgf fgacd cg fdcg agfd fcd d
+3 is fcd or 
+then we remove 7 (and drop 8)
+cgf fgac cg fcg agf fc fac
+6 is size 4 or fgac or fgaecd
+
+0 -
+1 - be
+2 - 
+3 - fabcd
+4 - cgeb
+5 - 
+6 - fgaecd
+7 - edb
+8 - cfbegad
+9 - 
+
+
+We know 1 since it's size 2
+We know 4 since it's the only size 4
+We know 8 since it's the only size 7
+We know 7 since it's the only size 3
+
+if we remove 1 from the rest of the strings we can find 3 as it will be the only one of size 3
+
+##################
+  0:      1:      2:      3:      4:
+ aaaa    ....    aaaa    aaaa    ....
+b    c  .    c  .    c  .    c  b    c
+b    c  .    c  .    c  .    c  b    c
+ ....    ....    dddd    dddd    dddd
+e    f  .    f  e    .  .    f  .    f
+e    f  .    f  e    .  .    f  .    f
+ gggg    ....    gggg    gggg    ....
+
+  5:      6:      7:      8:      9:
+ aaaa    aaaa    aaaa    aaaa    aaaa
+b    .  b    .  .    c  b    c  b    c
+b    .  b    .  .    c  b    c  b    c
+ dddd    dddd    ....    dddd    dddd
+.    f  e    f  .    f  e    f  .    f
+.    f  e    f  .    f  e    f  .    f
+ gggg    gggg    ....    gggg    gggg
+ ###################
+if we remove 1 from 7 we get A
+if we count the character occurances the one appearing 6 times is B
+if we count the character occurances A and C appear 8 times (we know which is A so we can get C)
+if we count the character occurances E appears 4 times
+if we count the character occurances F appears 9 times
+if we remove B C and F from 4 we get D
+that leaves the last one to be G (or we can remove all from 8 and that would leave G)
+
+once we have the correct mappings we can use them to read the output numbers
+
+###########################
+if we remove 7 from 8 and add A we get 6
+if we remove 1 from all and get size 3 then thats 3
+if we add 3 and 4 we get 9
+if we remove 9 from 8 we get E
+if we count the character occurances the one appearing 9 times is F
+if we count the character occurances the one appearing 6 times is B
+if we remove B from 4 and then remove 1 from 4 we get D

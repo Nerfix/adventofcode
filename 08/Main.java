@@ -23,8 +23,10 @@ class Main {
   }
 
   public static int part2(String fileName) {
+    ArrayList<SignalEntry> signalEntries = parseInput(fileName);
+    SignalDecoder signalDecoder = new SignalDecoder();
 
-    return 0;
+    return signalDecoder.decode(signalEntries);
   }
 
   public static ArrayList<SignalEntry> parseInput(String fileName) {
