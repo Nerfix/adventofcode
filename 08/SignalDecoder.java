@@ -1,8 +1,5 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Base64.Decoder;
 
 public class SignalDecoder {
   public int decodeSimple(ArrayList<SignalEntry> signalEntries) {
