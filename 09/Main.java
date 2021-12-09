@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 class Main {
   public static void main(String[] args) {
@@ -20,8 +21,13 @@ class Main {
   }
 
   public static int part2(String fileName) {
+    HeightMapAnalyser heightMapAnalyser = new HeightMapAnalyser(parseInput(fileName));
+    ArrayList<Integer> basinSizes = heightMapAnalyser.findBasinSizes();
 
-    return 0;
+    basinSizes.sort(Comparator.reverseOrder());
+
+    int result = basinSizes.get(0) * basinSizes.get(1) * basinSizes.get(2);
+    return result;
   }
 
   public static ArrayList<ArrayList<Zone>> parseInput(String fileName) {

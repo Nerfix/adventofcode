@@ -1,5 +1,7 @@
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class HeightMapAnalyser {
   ArrayList<ArrayList<Zone>> heights;
@@ -17,37 +19,148 @@ public class HeightMapAnalyser {
 
     return riskLevel;
   }
-  
-  private ArrayList<Integer> findLocalMinimums() {
-    ArrayList<Integer> localMinimums = new ArrayList<>();
+
+  public ArrayList<Integer> findBasinSizes() {
+    ArrayList<Integer> basinSizes = new ArrayList<>();
 
     for (int row = 0; row < heights.size(); row++) {
       for (int entry = 0; entry < heights.get(row).size(); entry++) {
         Point coordinates = new Point(row, entry);
-        Point localMinimaCoordinates = findLocalMinima(coordinates);
-        if (localMinimaCoordinates != null) {
-          int minima = heights.get(localMinimaCoordinates.x).get(localMinimaCoordinates.y).height;
-          localMinimums.add(minima);
+        Integer basinSize = calculateBasinSize(coordinates);
+
+        if (basinSize != 0) {
+          basinSizes.add(basinSize);
         }
       }
     }
 
+    return basinSizes;
+  }
+
+  private int calculateBasinSize(Point origin) {
+    if (heights.get(origin.x).get(origin.y).height == 9 ||
+        heights.get(origin.x).get(origin.y).checked) {
+      return 0;
+    }
+    markCoordinates(origin);
+    ArrayList<Point> neighbours = getNeighbours(origin);
+    int counter = 1;
+
+    if (neighbours.size() == 0) {
+      return counter;
+    }
+
+    for (Point p : neighbours) {
+      counter += calculateBasinSize(p);
+    }
+
+    return counter;
+
+  }
+
+  private ArrayList<Point> getNeighbours(Point origin) {
+    ArrayList<Point> neighbours = new ArrayList<>();
+
+    if (origin.x != 0) {
+      Point neighbourCoordinates = new Point(origin.x - 1, origin.y);
+      if (heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).height != 9 &&
+          !heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).checked) {
+        
+        neighbours.add(new Point(neighbourCoordinates));
+      }
+    }
+
+    if (origin.x < heights.size() - 1) {
+      Point neighbourCoordinates = new Point(origin.x + 1, origin.y);
+      if (heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).height != 9 &&
+          !heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).checked) {
+        
+        neighbours.add(new Point(neighbourCoordinates));
+      }
+    }
+
+    if (origin.y != 0) {
+      Point neighbourCoordinates = new Point(origin.x, origin.y - 1);
+      if (heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).height != 9 &&
+          !heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).checked) {
+        
+        neighbours.add(new Point(neighbourCoordinates));
+      }
+    }
+
+    if (origin.y < heights.get(0).size() - 1) {
+      Point neighbourCoordinates = new Point(origin.x, origin.y + 1);
+      if (heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).height != 9 &&
+          !heights.get(neighbourCoordinates.x).get(neighbourCoordinates.y).checked) {
+        
+        neighbours.add(new Point(neighbourCoordinates));
+      }
+    }
+
+    return neighbours;
+  }
+  
+  private ArrayList<Integer> findLocalMinimums() {
+    Set<Point> localMinimumsCoordinates = new HashSet<>();
+
+    for (int row = 0; row < heights.size(); row++) {
+      for (int entry = 0; entry < heights.get(row).size(); entry++) {
+        Point coordinates = new Point(row, entry);
+        Point localMinimaCoordinates = findLocalMinimaSimple(coordinates);
+        if (localMinimaCoordinates != null) {
+          localMinimumsCoordinates.add(localMinimaCoordinates);
+        }
+      }
+    }
+
+    ArrayList<Integer> localMinimums = new ArrayList<>();
+    for (Point coordinate : localMinimumsCoordinates) {
+      localMinimums.add(heights.get(coordinate.x).get(coordinate.y).height);
+    }
     return localMinimums;
   }
 
-  private Point findLocalMinima(Point coordinates) {
-    if (isVisited(coordinates)) {
-      return null;
-    }
-
-    markCoordinates(coordinates);
+  private Point findLocalMinimaSimple(Point coordinates) {
     Point smallestNeighbour = findSmallestNeighbour(coordinates);
 
-    if (smallestNeighbour.equals(coordinates)) {
+    if (smallestNeighbour == null && hasEqualNeighbour(coordinates)) {
+      return null;
+    } else if (smallestNeighbour == null) {
       return coordinates;
-    } else {
-      return findLocalMinima(smallestNeighbour);
+    }  
+    else {
+      return findLocalMinimaSimple(smallestNeighbour);
     }
+  }
+
+  private boolean hasEqualNeighbour(Point coordinates) {
+    int currentValue = heights.get(coordinates.x).get(coordinates.y).height;
+    
+    if (getTopNeighbourValue(coordinates) != null) {
+      if (currentValue == getTopNeighbourValue(coordinates)) {
+        return true;
+      }
+    }
+
+    if (getBottomNeighbourValue(coordinates) != null) {
+      if (currentValue == getBottomNeighbourValue(coordinates)) {
+        return true;
+      }
+    }
+
+    if (getLeftNeighbourValue(coordinates) != null) {
+      if (currentValue == getLeftNeighbourValue(coordinates)) {
+        return true;
+      }
+    }
+
+    if (getRightNeighbourValue(coordinates) != null) {
+      if (currentValue == getRightNeighbourValue(coordinates)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private boolean isVisited(Point coordinates) {
@@ -62,7 +175,7 @@ public class HeightMapAnalyser {
 
   private Point findSmallestNeighbour(Point coordinates) {
     int currentValue = heights.get(coordinates.x).get(coordinates.y).height;
-    Point smallestNeighbourCoordinates = new Point(coordinates);
+    Point smallestNeighbourCoordinates = null;
 
     if (getTopNeighbourValue(coordinates) != null) {
       if (currentValue > getTopNeighbourValue(coordinates)) {
